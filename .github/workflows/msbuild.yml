@@ -1,4 +1,4 @@
-name: MSBuild Aggressive Debug and Artifact Upload
+name: MSBuild with Artifact Upload
 
 on:
   push:
@@ -28,30 +28,29 @@ jobs:
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v1.0.2
 
-    # Restore NuGet packages
+    # Restore NuGet packages (if needed)
     - name: Restore NuGet packages
       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
-    # Build all projects in the solution with detailed logs
-    - name: Build Solution with Detailed Logs
+    # Build all projects with specified configuration
+    - name: Build Solution
       run: |
-        msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:OutDir=${{env.GITHUB_WORKSPACE}}/artifacts /verbosity:detailed ${{env.SOLUTION_FILE_PATH}}
-      env:
-        MSBUILDDISABLENODEREUSE: "true" # Ensures a clean build
+        msbuild ${{env.SOLUTION_FILE_PATH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 /verbosity:normal
 
-    # Debug: List all files in the workspace after build
+    # Debug: List all files in the output directories
     - name: Debug Workspace Files
       run: |
-        echo "Listing all files in the workspace after build:"
-        dir ${{env.GITHUB_WORKSPACE}} /s /b
+        echo "Listing all files in project output directories:"
+        dir Source\**\output\x64\Release /s /b
 
-    # Aggressively upload all possible compiled files
-    - name: Upload All Compiled Artifacts
+    # Upload compiled files as artifacts
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v4.6.2
       with:
         name: Compiled-Outputs
         path: |
-          ${{env.GITHUB_WORKSPACE}}/artifacts/**/*   # Capture files in the artifacts folder
-          ${{env.GITHUB_WORKSPACE}}/Source/**/bin/**/*   # Capture all binaries
-          ${{env.GITHUB_WORKSPACE}}/Source/**/obj/**/*   # Capture intermediary files
-        if-no-files-found: warn
+          Source/**/output/x64/Release/**/*.dll
+          Source/**/output/x64/Release/**/*.exe
+          Source/**/output/x64/Release/**/*.lib
+          Source/**/output/x64/Release/**/*.pdb
+        if-no-files-found: error
