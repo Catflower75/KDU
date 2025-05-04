@@ -1,4 +1,4 @@
-name: MSBuild with Artifact Upload
+name: MSBuild with Merged Artifact Upload
 
 on:
   push:
@@ -37,21 +37,29 @@ jobs:
       run: |
         msbuild ${{env.SOLUTION_FILE_PATH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 /verbosity:normal
 
-    # Debug: List all files in the output directories
-    - name: Debug Workspace Files
-      shell: bash
+    # Merge all outputs into a single folder
+    - name: Merge Outputs to Single Folder
       run: |
-        echo "Listing all files in project output directories:"
-        find Source -type f -path "*/output/x64/Release/*"
+        echo "Creating final output directory..."
+        mkdir finalapp\output
+        echo "Copying Hamakaze output..."
+        xcopy Source\Hamakaze\output\* finalapp\output /E /Y
+        echo "Copying Taigei output..."
+        xcopy Source\Taigei\output\* finalapp\output /E /Y
+        echo "Copying Tanikaze output..."
+        xcopy Source\Tanikaze\output\x64\Release\* finalapp\output /E /Y
+        echo "All outputs merged into finalapp/output."
 
-    # Upload compiled files as artifacts
-    - name: Upload Artifacts
+    # Debug: List all files in the final output folder
+    - name: Debug Final Output Files
+      run: |
+        echo "Listing all files in final output directory:"
+        dir finalapp\output /s /b
+
+    # Upload merged output as a single artifact
+    - name: Upload Merged Artifact
       uses: actions/upload-artifact@v4.6.2
       with:
-        name: Compiled-Outputs
-        path: |
-          Source/**/output/x64/Release/**/*.dll
-          Source/**/output/x64/Release/**/*.exe
-          Source/**/output/x64/Release/**/*.lib
-          Source/**/output/x64/Release/**/*.pdb
+        name: FinalApp-Output
+        path: finalapp\output
         if-no-files-found: error
