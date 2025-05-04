@@ -1,4 +1,4 @@
-name: MSBuild
+name: MSBuild Aggressive Artifact Upload
 
 on:
   push:
@@ -36,9 +36,13 @@ jobs:
     - name: Build Solution
       run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:OutDir=${{env.GITHUB_WORKSPACE}}/artifacts ${{env.SOLUTION_FILE_PATH}}
 
-    # Upload the compiled files as a single artifact
-    - name: Upload Build Artifacts
+    # Find and upload all compiled outputs
+    - name: Upload All Compiled Artifacts
       uses: actions/upload-artifact@v4.6.2
       with:
-        name: Compiled-Projects
-        path: ${{env.GITHUB_WORKSPACE}}/artifacts
+        name: Compiled-Outputs
+        path: |
+          **/bin/**/*
+          **/obj/**/*
+          artifacts/
+        if-no-files-found: warn
