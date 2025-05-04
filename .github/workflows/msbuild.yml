@@ -35,12 +35,14 @@ jobs:
     # Build all projects in the solution with detailed logs
     - name: Build Solution with Detailed Logs
       run: |
-        msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:OutDir=${{env.GITHUB_WORKSPACE}}/artifacts /verbosity:detailed ${{env.SOLUTION_FILE_PATH}}
+        msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=Win32 /target:Rebuild ${{env.SOLUTION_FILE_PATH}}
+      env:
+        MSBUILDDISABLENODEREUSE: "true" # Ensures a clean build
 
     # Debug: List all files in the workspace after build
     - name: Debug Workspace Files
       run: |
-        echo "Listing all files in the workspace..."
+        echo "Listing all files in the workspace:"
         dir /s /b
 
     # Aggressively upload all possible compiled files
@@ -49,7 +51,6 @@ jobs:
       with:
         name: Compiled-Outputs
         path: |
-          **/bin/**/*   # Capture all binaries
-          **/obj/**/*   # Capture intermediary files
-          artifacts/**  # Capture explicitly directed output
+          Source/**/bin/**/*   # Capture all binaries
+          Source/**/obj/**/*   # Capture intermediary files
         if-no-files-found: warn
