@@ -8,7 +8,7 @@ on:
 
 env:
   # Path to the solution (.sln) file relative to the root of the project.
-  SOLUTION_FILE_PATH: <path-to-your-solution-file>.sln
+  SOLUTION_FILE_PATH: KDU.sln
 
   # Configuration type to build (e.g., Release or Debug).
   BUILD_CONFIGURATION: Release
