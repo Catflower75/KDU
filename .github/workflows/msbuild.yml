@@ -39,27 +39,29 @@ jobs:
 
     # Merge all outputs into a single folder
     - name: Merge Outputs to Single Folder
+      shell: bash
       run: |
         echo "Creating final output directory..."
-        mkdir finalapp\output
+        mkdir -p finalapp/output
         echo "Copying Hamakaze output..."
-        xcopy Source\Hamakaze\output\* finalapp\output /E /Y
+        cp -R Source/Hamakaze/output/* finalapp/output/
         echo "Copying Taigei output..."
-        xcopy Source\Taigei\output\* finalapp\output /E /Y
+        cp -R Source/Taigei/output/* finalapp/output/
         echo "Copying Tanikaze output..."
-        xcopy Source\Tanikaze\output\x64\Release\* finalapp\output /E /Y
+        cp -R Source/Tanikaze/output/x64/Release/* finalapp/output/
         echo "All outputs merged into finalapp/output."
 
     # Debug: List all files in the final output folder
     - name: Debug Final Output Files
+      shell: bash
       run: |
         echo "Listing all files in final output directory:"
-        dir finalapp\output /s /b
+        find finalapp/output -type f
 
     # Upload merged output as a single artifact
     - name: Upload Merged Artifact
       uses: actions/upload-artifact@v4.6.2
       with:
         name: FinalApp-Output
-        path: finalapp\output
+        path: finalapp/output
         if-no-files-found: error
