@@ -37,19 +37,23 @@ jobs:
       run: |
         msbuild ${{env.SOLUTION_FILE_PATH}} /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=x64 /verbosity:normal
 
-    # Merge all outputs into a single folder
-    - name: Merge Outputs to Single Folder
+    # Merge specific required outputs into a single folder
+    - name: Merge Required Outputs to Final Folder
       shell: bash
       run: |
         echo "Creating final output directory..."
         mkdir -p finalapp/output
-        echo "Copying Hamakaze output..."
-        cp -R Source/Hamakaze/output/* finalapp/output/
-        echo "Copying Taigei output..."
-        cp -R Source/Taigei/output/* finalapp/output/
-        echo "Copying Tanikaze output..."
-        cp -R Source/Tanikaze/output/x64/Release/* finalapp/output/
-        echo "All outputs merged into finalapp/output."
+
+        echo "Copying kdu.exe from Hamakaze..."
+        cp Source/Hamakaze/output/x64/Release/kdu.exe finalapp/output/
+
+        echo "Copying Taigei64.dll from Taigei..."
+        cp Source/Taigei/output/x64/Release/Taigei64.dll finalapp/output/
+
+        echo "Copying drv64.dll from Tanikaze..."
+        cp Source/Tanikaze/output/x64/Release/drv64.dll finalapp/output/
+
+        echo "All required files copied to finalapp/output."
 
     # Debug: List all files in the final output folder
     - name: Debug Final Output Files
