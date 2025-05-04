@@ -1,4 +1,4 @@
-name: MSBuild Aggressive Artifact Upload
+name: MSBuild Aggressive Debug and Artifact Upload
 
 on:
   push:
@@ -32,17 +32,24 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
 
-    # Build all projects in the solution
-    - name: Build Solution
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:OutDir=${{env.GITHUB_WORKSPACE}}/artifacts ${{env.SOLUTION_FILE_PATH}}
+    # Build all projects in the solution with detailed logs
+    - name: Build Solution with Detailed Logs
+      run: |
+        msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:OutDir=${{env.GITHUB_WORKSPACE}}/artifacts /verbosity:detailed ${{env.SOLUTION_FILE_PATH}}
 
-    # Find and upload all compiled outputs
+    # Debug: List all files in the workspace after build
+    - name: Debug Workspace Files
+      run: |
+        echo "Listing all files in the workspace..."
+        dir /s /b
+
+    # Aggressively upload all possible compiled files
     - name: Upload All Compiled Artifacts
       uses: actions/upload-artifact@v4.6.2
       with:
         name: Compiled-Outputs
         path: |
-          **/bin/**/*
-          **/obj/**/*
-          artifacts/
+          **/bin/**/*   # Capture all binaries
+          **/obj/**/*   # Capture intermediary files
+          artifacts/**  # Capture explicitly directed output
         if-no-files-found: warn
