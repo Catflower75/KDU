@@ -39,9 +39,10 @@ jobs:
 
     # Debug: List all files in the output directories
     - name: Debug Workspace Files
+      shell: bash
       run: |
         echo "Listing all files in project output directories:"
-        dir Source\**\output\x64\Release /s /b
+        find Source -type f -path "*/output/x64/Release/*"
 
     # Upload compiled files as artifacts
     - name: Upload Artifacts
